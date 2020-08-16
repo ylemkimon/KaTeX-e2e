@@ -1,0 +1,43 @@
+name: E2E
+
+on:
+  push:
+    branches: [ master ]
+  schedule:
+    - cron: '0 2 * * *'
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+        node: [10, 12, 14]
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        repository: KaTeX/KaTeX
+        submodules: recursive
+
+    - name: Use Node.js ${{ matrix.node }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node }}
+
+    - name: Cache dependencies
+      uses: actions/cache@v2
+      with:
+        path: |
+          .yarn/cache
+          .pnp.js
+        key: yarn-deps-v1-${{ matrix.os }}-${{ hashFiles('yarn.lock') }}
+        restore-keys: |
+          yarn-deps-v1-${{ matrix.os }}-
+          yarn-deps-v1-
+
+    - name: Install dependencies
+      run: yarn --immutable
+
+    - name: Lint code
+      run: yarn test
