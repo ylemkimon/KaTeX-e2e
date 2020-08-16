@@ -13,8 +13,12 @@ jobs:
       matrix:
         os: [macos-latest, windows-latest, ubuntu-latest]
         node: [10, 12, 14]
+      fail-fast: false
 
     steps:
+    - run: git config --global core.autocrlf input
+      if: startsWith(matrix.os, 'windows')
+
     - uses: actions/checkout@v2
       with:
         repository: KaTeX/KaTeX
@@ -39,5 +43,5 @@ jobs:
     - name: Install dependencies
       run: yarn --immutable
 
-    - name: Lint code
+    - name: Test code
       run: yarn test
